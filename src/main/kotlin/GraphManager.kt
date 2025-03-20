@@ -2,39 +2,32 @@ package mateusz
 
 import ui.GraphDisplayPanel
 import ui.VerticesPanel
-import java.io.File
 
 object GraphManager {
-    private val file = File("src/data/special/opened-graph.txt")
-
     fun inform(newInput: String, e: javax.swing.event.DocumentEvent?) {
-        GraphDisplayPanel.updateGraph(newInput)
-
-        if (isValid(newInput)) file.writeText(newInput)
+        validate(newInput)
     }
 
-    private fun isValid(newInput: String): Boolean {
-        if (newInput == "") return false
-
-        val vertices = mutableSetOf<String>()
+    private fun validate(newInput: String) {
+        val pairs = mutableListOf<Pair<String, String>>()
 
         newInput.split("\n").forEach {
-            if (!it.contains("->")) return false
+            if (it != "" && !it.contains("->")) return
 
-            vertices.add(getVertices(it).first)
-            vertices.add(getVertices(it).second)
+            pairs.add(getVerticesFromLine(it))
         }
-        VerticesPanel.updateVertices(vertices)
+        Graph.setGraph(pairs)
 
-        return true
+        VerticesPanel.update()
+        GraphDisplayPanel.update()
     }
-    fun getVertices(line: String): Pair<String, String> {
+    private fun getVerticesFromLine(line: String): Pair<String, String> {
         val first = line.split("->")[0]
         return first.trim() to line.removePrefix("$first->").trim()
-
     }
 
-    fun changeVertexState(vertex: String, isShowing: Boolean) {
-
+    fun changeVertexState(vertex: String, targetState: Boolean) {
+        Graph.changeVertexState(vertex, targetState)
+        GraphDisplayPanel.update()
     }
 }

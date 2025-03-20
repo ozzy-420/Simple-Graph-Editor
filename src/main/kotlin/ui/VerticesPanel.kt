@@ -1,7 +1,7 @@
 package ui
 
+import mateusz.Graph
 import mateusz.GraphManager
-import java.awt.event.ActionListener
 import javax.swing.BoxLayout
 import javax.swing.JCheckBox
 import javax.swing.JPanel
@@ -23,7 +23,10 @@ object VerticesPanel : JPanel() {
     private fun addVertex(vertex: String) {
         val checkBox = JCheckBox(vertex)
         checkBox.isSelected = true
-        checkBox.addActionListener { ActionListener { GraphManager.changeVertexState(vertex, checkBox.isSelected) } }
+        checkBox.addActionListener {
+            GraphManager.changeVertexState(vertex, checkBox.isSelected)
+            println("Changed $vertex state to: ${checkBox.isSelected}")
+        }
 
         add(checkBox)
         vertexToCheckBox[vertex] = checkBox
@@ -39,7 +42,9 @@ object VerticesPanel : JPanel() {
         repaint()
     }
 
-    fun updateVertices(vertices: Collection<String>) {
+    fun update() {
+        val vertices = Graph.getVertices()
+
         vertices.forEach {
             tryAddVertex(it)
         }

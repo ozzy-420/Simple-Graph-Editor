@@ -1,5 +1,6 @@
 package ui
 
+import mateusz.Graph
 import mateusz.utils.PlantUMLUtil
 import java.awt.BorderLayout
 import javax.swing.ImageIcon
@@ -12,10 +13,10 @@ object GraphDisplayPanel : JPanel(BorderLayout()) {
 
     init {
         add(graphLabel, BorderLayout.CENTER)
-        updateGraph("")
+        graphLabel.icon = ImageIcon(PlantUMLUtil.generateImage(""))
     }
 
-    fun updateGraph(graph: String) {
-        graphLabel.icon = ImageIcon(PlantUMLUtil.generateImage(graph))
+    fun update() {
+        graphLabel.icon = ImageIcon(PlantUMLUtil.generateImage(Graph.toString()))
     }
 }
