@@ -1,4 +1,6 @@
-package mateusz
+package mateusz.graph
+
+import ui.GraphDisplayPanel
 
 object Graph {
     private val vertices = mutableMapOf<String, Vertex>()
@@ -19,7 +21,7 @@ object Graph {
         }
     }
 
-    private fun addEdge(edge: Pair<String, String>) {
+    fun addEdge(edge: Pair<String, String>) {
         if (edge.first !in vertices.keys) vertices[edge.first] = Vertex(edge.first)
         if (edge.second !in vertices.keys) vertices[edge.second] = Vertex(edge.second)
 
@@ -28,9 +30,14 @@ object Graph {
 
     fun changeVertexState(neighbour: String, state: Boolean) {
         vertices[neighbour]!!.isActive = state
+        GraphDisplayPanel.update()
     }
 
     override fun toString(): String {
         return vertices.values.joinToString("")
+    }
+
+    fun reset() {
+        vertices.clear()
     }
 }

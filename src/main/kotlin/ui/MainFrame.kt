@@ -10,7 +10,7 @@ class MainFrame : JFrame() {
         defaultCloseOperation = EXIT_ON_CLOSE
         layout = BorderLayout()
 
-        jMenuBar = ui.MenuBar()
+        jMenuBar = MenuBar()
 
         val splitPane1 = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, GraphInputPanel, GraphDisplayPanel)
         splitPane1.dividerLocation = 100

@@ -1,17 +1,20 @@
 package ui
 
-import mateusz.Graph
-import mateusz.GraphManager
+import mateusz.graph.Graph
 import javax.swing.BoxLayout
 import javax.swing.JCheckBox
 import javax.swing.JPanel
+import javax.swing.JScrollPane
 
-object VerticesPanel : JPanel() {
+object VerticesPanel : JScrollPane() {
     private fun readResolve(): Any = VerticesPanel
     private val vertexToCheckBox: MutableMap<String, JCheckBox> = HashMap()
+    private val panel = JPanel()
 
     init {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+        setViewportView(panel)
+        verticalScrollBarPolicy = VERTICAL_SCROLLBAR_ALWAYS
     }
 
     private fun tryAddVertex(vertex: String) {
@@ -21,22 +24,15 @@ object VerticesPanel : JPanel() {
     }
 
     private fun addVertex(vertex: String) {
-        val checkBox = JCheckBox(vertex)
-        checkBox.isSelected = true
-        checkBox.addActionListener {
-            GraphManager.changeVertexState(vertex, checkBox.isSelected)
-            println("Changed $vertex state to: ${checkBox.isSelected}")
-        }
-
-        add(checkBox)
-        vertexToCheckBox[vertex] = checkBox
+        addVertexSync(vertex)
 
         revalidate()
         repaint()
     }
 
     private fun removeVertex(vertex: String) {
-        remove(vertexToCheckBox[vertex])
+        panel.remove(vertexToCheckBox[vertex])
+        vertexToCheckBox.remove(vertex)
 
         revalidate()
         repaint()
@@ -49,10 +45,46 @@ object VerticesPanel : JPanel() {
             tryAddVertex(it)
         }
 
+        val verticesToRemove = mutableListOf<String>()
+
         for ((vertex, _) in vertexToCheckBox) {
             if (vertex !in vertices) {
-                removeVertex(vertex)
+                verticesToRemove.add(vertex)
             }
         }
+
+        verticesToRemove.forEach {
+            removeVertex(it)
+        }
+    }
+
+    fun reset() {
+        panel.removeAll()
+        vertexToCheckBox.clear()
+
+        revalidate()
+        repaint()
+    }
+
+    fun addVertexSync(vertex: String) {
+        val checkBox = JCheckBox(vertex)
+        checkBox.isSelected = true
+        checkBox.addActionListener {
+            Graph.changeVertexState(vertex, checkBox.isSelected)
+        }
+
+        panel.add(checkBox)
+        vertexToCheckBox[vertex] = checkBox
+    }
+
+    fun updateSync() {
+        val vertices = Graph.getVertices()
+
+        vertices.forEach {
+            addVertexSync(it)
+        }
+
+        revalidate()
+        repaint()
     }
 }

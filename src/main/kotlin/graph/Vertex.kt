@@ -1,4 +1,4 @@
-package mateusz
+package mateusz.graph
 
 class Vertex(val name: String) {
     private val neighbours = mutableSetOf<Vertex>()
