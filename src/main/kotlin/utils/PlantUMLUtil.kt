@@ -9,6 +9,11 @@ import javax.imageio.ImageIO
 object PlantUMLUtil {
     var timestamp = LocalTime.now()
 
+    init {
+        // Initialize an image because the first image generation takes a long time
+        generateImage("")
+    }
+
     fun generateImage(source: String): BufferedImage {
         timestamp = LocalTime.now()
 

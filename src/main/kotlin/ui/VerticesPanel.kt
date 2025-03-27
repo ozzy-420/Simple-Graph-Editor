@@ -66,18 +66,18 @@ object VerticesPanel : JScrollPane() {
         repaint()
     }
 
-    fun addVertexSync(vertex: String) {
+    private fun addVertexSync(vertex: String) {
         val checkBox = JCheckBox(vertex)
         checkBox.isSelected = true
         checkBox.addActionListener {
-            Graph.changeVertexState(vertex, checkBox.isSelected)
+            Graph.setVertexState(vertex, checkBox.isSelected)
         }
 
         panel.add(checkBox)
         vertexToCheckBox[vertex] = checkBox
     }
 
-    fun updateSync() {
+    fun syncUpdate() {
         val vertices = Graph.getVertices()
 
         vertices.forEach {

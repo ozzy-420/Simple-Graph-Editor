@@ -3,7 +3,8 @@ package ui
 import javax.swing.*
 import java.io.File
 import kotlinx.coroutines.*
-import java.util.concurrent.Executors
+import mateusz.FileManager
+
 
 class MenuBar : JMenuBar() {
     init {
@@ -24,30 +25,9 @@ class MenuBar : JMenuBar() {
         fileMenu.addSeparator() // Add a separator line
         fileMenu.add(exitItem)
 
-        openItem.addActionListener {
-            val fileChooser = JFileChooser(File("data"))
-            val result = fileChooser.showOpenDialog(null)
-            if (result == JFileChooser.APPROVE_OPTION) {
-                val selectedFile: File = fileChooser.selectedFile
-
-                GlobalScope.launch(Dispatchers.IO) {
-                    selectedFile.bufferedReader().use { reader ->
-                        var line: String
-                        GraphInputPanel.removeDocumentListener()
-                        GraphInputPanel.resetInput()
-
-                        while (reader.readLine().also { line = it } != null) {
-                            val content = line
-                            withContext(Dispatchers.Main) {
-                                GraphInputPanel.addInput(content)
-                            }
-                        }
-                    }
-                    GraphInputPanel.syncUpdate()
-                    GraphInputPanel.addDocumentListener()
-                }
-            }
-        }
+        // Add functionality to the menu items
+        openItem.addActionListener { FileManager.open() }
+        newItem.addActionListener { FileManager.new() }
 
         // Add menus to the menu bar
         add(fileMenu)

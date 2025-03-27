@@ -8,10 +8,6 @@ class Vertex(val name: String) {
         neighbours.add(neighbour)
     }
 
-    fun removeNeighbour(neighbour: Vertex) {
-        neighbours.remove(neighbour)
-    }
-
     override fun toString(): String {
         if (!isActive) return ""
         val activeNeighbours = neighbours.filter { it.isActive }
