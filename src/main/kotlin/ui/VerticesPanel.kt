@@ -46,8 +46,6 @@ object VerticesPanel : JPanel() {
         vertexToCheckBox.forEach { (vertex, checkBox) ->
             checkBox.isVisible = vertex.lowercase().contains(filterText)
         }
-        verticesPanel.revalidate()
-        verticesPanel.repaint()
     }
 
 
@@ -62,6 +60,8 @@ object VerticesPanel : JPanel() {
 
         verticesPanel.add(checkBox)
         vertexToCheckBox[vertex] = checkBox
+
+        checkBox.isVisible = vertex.lowercase().contains(searchBar.text.trim().lowercase())
 
         revalidate()
         repaint()
@@ -84,20 +84,14 @@ object VerticesPanel : JPanel() {
         revalidate()
         repaint()
     }
-
-    fun reload() {
+    
+    fun resetSearchBar() {
+        searchBar.document.removeDocumentListener(documentListener)
         searchBar.text = ""
+        searchBar.document.addDocumentListener(documentListener)
 
-        verticesPanel.removeAll()
-        vertexToCheckBox.clear()
-
-        val vertices = Graph.getVertices()
-
-        vertices.forEach {
-            addVertex(it)
+        vertexToCheckBox.forEach { (_, checkBox) ->
+            checkBox.isVisible = true
         }
-
-        revalidate()
-        repaint()
     }
 }
