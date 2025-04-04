@@ -14,11 +14,19 @@ import javax.swing.JPanel
 object DisplayArea : JPanel(BorderLayout()) {
     private fun readResolve(): Any = DisplayArea
 
+    public enum class invalidInput {
+        NOT_AN_EDGE,
+        EMPTY_STRING
+    }
+
     private var updateJob: Job? = null
     private var image: BufferedImage? = null
     private val invalidInputLabel = JLabel("Invalid input label")
     private val loadingLabel = JLabel("Loading...")
 
+    init {
+        image = PlantUMLUtil.generateImage("")
+    }
 
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
@@ -49,10 +57,10 @@ object DisplayArea : JPanel(BorderLayout()) {
         }
     }
 
-    fun showInvalidInput(input: String, index: Int) {
+    fun showInvalidInput(input: String, index: Int, type: invalidInput) {
         removeAll()
 
-        invalidInputLabel.text = "Invalid at line $index: $input"
+        invalidInputLabel.text = "Invalid at line $index: $input: ${type.name}"
 
         add(invalidInputLabel, BorderLayout.NORTH)
 

@@ -41,7 +41,7 @@ object Graph {
     }
 
     override fun toString(): String {
-        return vertices.values.joinToString("")
+        return vertices.values.joinToString("\n")
     }
 
     fun clear() {

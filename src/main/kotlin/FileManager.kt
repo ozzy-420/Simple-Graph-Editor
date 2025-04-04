@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mateusz.graph.Graph
 import ui.DisplayArea
 import ui.InputArea
 import ui.VerticesPanel
@@ -13,6 +14,8 @@ import javax.swing.JFileChooser
 import javax.swing.JPopupMenu
 
 object FileManager {
+    private var currentFile: File? = null
+
     fun open() {
         val fileChooser = JFileChooser(File("data"))
         val result = fileChooser.showOpenDialog(null)
@@ -39,6 +42,7 @@ object FileManager {
                     }
                 }
             }
+            currentFile = file
 
             // Update the graph input panel
             InputArea.syncUpdate()
@@ -50,8 +54,21 @@ object FileManager {
     }
 
     fun new() {
+        InputArea.clear()
+        currentFile = null
+    }
+
+    fun save() {
+        if (currentFile == null) {
+            saveAs()
+        } else {
+            currentFile?.writeText(InputArea.getInput())
+        }
+    }
+
+    fun saveAs() {
         val fileChooser = JFileChooser("data")
-        fileChooser.dialogTitle = "Create New File"
+        fileChooser.dialogTitle = "Save File"
         fileChooser.fileSelectionMode = JFileChooser.FILES_ONLY
 
         val userSelection = fileChooser.showSaveDialog(null)
@@ -64,10 +81,10 @@ object FileManager {
 
             if (fileToSave.createNewFile()) {
                 println("File created: ${fileToSave.absolutePath}")
-            } else {
-                val popup = JPopupMenu("File already exists.")
-                popup.show(fileChooser, 0, 0)
             }
+
+            fileToSave.writeText(InputArea.getInput())
+            currentFile = fileToSave
         }
     }
 

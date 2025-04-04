@@ -2,28 +2,40 @@ package mateusz
 
 import mateusz.graph.Graph
 import ui.DisplayArea
+import ui.VerticesPanel
 
 fun parseEdge(line: String): Pair<String, String> {
-    val first = line.split("->")[0]
-    return first.trim() to line.removePrefix("$first->").trim()
+    val first = line.substringBefore("->").trim()
+    val second = line.substringAfter("->").trim()
+    return first to second
 }
 
 object TextAnalyzer {
-
-    fun updateGraph(newInput: String) {
+    fun analyze(newInput: String) {
         val edges = mutableListOf<Pair<String, String>>()
         var index = 0
+        var errorless = true
 
         newInput.split("\n").forEach {
             index++
 
-            if (it != "" && !it.contains("->")) {
-                DisplayArea.showInvalidInput(it, index)
-                return
+            if (errorless && it != "" && !it.contains("->")) {
+                DisplayArea.showInvalidInput(it, index, DisplayArea.invalidInput.NOT_AN_EDGE)
+                errorless = false
             }
-            edges.add(parseEdge(it))
+
+            val edge = parseEdge(it)
+            if (edge.first == "" || edge.second == "") {
+                if (errorless) {
+                    DisplayArea.showInvalidInput(it, index, DisplayArea.invalidInput.EMPTY_STRING)
+                    errorless = false
+                }
+            } else {
+                edges.add(parseEdge(it))
+            }
         }
 
         Graph.setEdges(edges)
+        VerticesPanel.update()
     }
 }

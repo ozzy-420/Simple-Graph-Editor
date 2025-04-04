@@ -13,6 +13,6 @@ class Vertex(val name: String) {
         val activeNeighbours = neighbours.filter { it.isActive }
         if (activeNeighbours.isEmpty()) return ""
 
-        return "\n$name->" + activeNeighbours.joinToString("\n$name->") { vertex: Vertex -> vertex.name }
+        return "$name->" + activeNeighbours.joinToString("\n$name->") { vertex: Vertex -> vertex.name }
     }
 }

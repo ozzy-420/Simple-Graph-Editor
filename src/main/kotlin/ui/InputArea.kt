@@ -14,9 +14,9 @@ object InputArea : JPanel(BorderLayout()) {
     private val graphInputArea = JTextArea()
     private val stringBuilder = StringBuilder()
     private val documentListener = object : javax.swing.event.DocumentListener {
-        override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.updateGraph(graphInputArea.text.trim())
-        override fun removeUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.updateGraph(graphInputArea.text.trim())
-        override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.updateGraph(graphInputArea.text.trim())
+        override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.analyze(graphInputArea.text.trim())
+        override fun removeUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.analyze(graphInputArea.text.trim())
+        override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.analyze(graphInputArea.text.trim())
     }
 
     init {
@@ -24,6 +24,11 @@ object InputArea : JPanel(BorderLayout()) {
 
         // graphInputArea.lineWrap = true
         add(JScrollPane(graphInputArea), BorderLayout.CENTER)
+    }
+
+    fun clear() {
+        graphInputArea.text = ""
+        TextAnalyzer.analyze(graphInputArea.text.trim())
     }
 
     fun resetInput() {
@@ -40,6 +45,10 @@ object InputArea : JPanel(BorderLayout()) {
         stringBuilder.append("\n")
 
         Graph.addEdge(parseEdge(input))
+    }
+
+    fun getInput(): String {
+        return graphInputArea.text
     }
 
     fun syncUpdate() {
