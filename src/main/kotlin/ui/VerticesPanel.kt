@@ -1,20 +1,60 @@
 package ui
 
+import kotlinx.coroutines.*
 import mateusz.graph.Graph
-import javax.swing.BoxLayout
-import javax.swing.JCheckBox
-import javax.swing.JPanel
-import javax.swing.JScrollPane
+import java.awt.BorderLayout
+import javax.swing.*
 
-object VerticesPanel : JScrollPane() {
+object VerticesPanel : JPanel() {
     private fun readResolve(): Any = VerticesPanel
     private val vertexToCheckBox: MutableMap<String, JCheckBox> = HashMap()
     private val panel = JPanel()
+    private val scrollPane = JScrollPane(panel)
+    private val searchBar = JTextField()
+    private val documentListener = object : javax.swing.event.DocumentListener {
+        override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = filterVertices(searchBar.text.trim().lowercase())
+        override fun removeUpdate(e: javax.swing.event.DocumentEvent?) = filterVertices(searchBar.text.trim().lowercase())
+        override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = filterVertices(searchBar.text.trim().lowercase())
+    }
+
 
     init {
+        layout = BorderLayout()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
-        setViewportView(panel)
-        verticalScrollBarPolicy = VERTICAL_SCROLLBAR_ALWAYS
+        scrollPane.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
+
+        searchBar.document.addDocumentListener(documentListener)
+
+        add(searchBar, BorderLayout.NORTH)
+        add(scrollPane, BorderLayout.CENTER)
+    }
+
+    private var filterJob: Job? = null
+    private fun filterVertices(filterText: String) {
+        // Create coroutine and job to filter the vertices
+        filterJob?.cancel() // Cancel the previous job if it is active
+
+        filterJob = GlobalScope.launch(Dispatchers.IO) {
+            delay(500) // Delay to avoid too many updates
+            if (!isActive) return@launch // Check if the job is canceled
+
+            SwingUtilities.invokeLater {
+                vertexToCheckBox.forEach { (vertex, checkBox) ->
+                    checkBox.isVisible = vertex.lowercase().contains(filterText)
+                }
+                panel.revalidate()
+                panel.repaint()
+            }
+        }
+    }
+    suspend fun filterVerticesSus(filterText: String) {
+        SwingUtilities.invokeLater {
+            vertexToCheckBox.forEach { (vertex, checkBox) ->
+                checkBox.isVisible = vertex.lowercase().contains(filterText)
+            }
+            panel.revalidate()
+            panel.repaint()
+        }
     }
 
     private fun tryAddVertex(vertex: String) {

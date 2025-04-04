@@ -25,7 +25,7 @@ object DisplayArea : JPanel(BorderLayout()) {
     private val loadingLabel = JLabel("Loading...")
 
     init {
-        image = PlantUMLUtil.generateImage("")
+        //image = PlantUMLUtil.generateImage("")
     }
 
     override fun paintComponent(g: Graphics) {
