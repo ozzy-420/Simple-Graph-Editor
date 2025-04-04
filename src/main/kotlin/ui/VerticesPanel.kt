@@ -95,5 +95,6 @@ object VerticesPanel : JPanel() {
 
         vertexToCheckBox.forEach { (_, checkBox) ->
             checkBox.isVisible = true
+        }
     }
 }
