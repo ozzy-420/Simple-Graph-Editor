@@ -1,20 +1,19 @@
 package mateusz
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.swing.Swing
 import mateusz.graph.Graph
 import ui.DisplayArea
 import ui.InputArea
 import ui.VerticesPanel
 import java.io.File
-import java.util.*
 import javax.swing.JFileChooser
-import javax.swing.JPopupMenu
+import javax.swing.JOptionPane
+import javax.swing.SwingUtilities
 
 object FileManager {
     private var currentFile: File? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun open() {
         val fileChooser = JFileChooser(File("data"))
@@ -22,34 +21,26 @@ object FileManager {
 
         if (result != JFileChooser.APPROVE_OPTION) return
 
-        val file: File = fileChooser.selectedFile
+        val file = fileChooser.selectedFile
+        scope.launch {
+            try {
+                val lines = file.bufferedReader().use { it.readLines() }
 
+                InputArea.freeze()
 
-        // Create a new coroutine to read the file
-        GlobalScope.launch(Dispatchers.IO) {
-            file.bufferedReader().use { reader ->
-                var line: String
+                lines.forEach { line ->
+                    InputArea.appendInput(line)
+                }
 
-                // Reset and disable the input panel
-                InputArea.removeDocumentListener()
-                InputArea.resetInput()
+                DisplayArea.update()
+                InputArea.unfreeze()
 
-                // Read the file line by line
-                while (reader.readLine().also { line = it } != null) {
-                    val content = line
-                    withContext(Dispatchers.Main) {
-                        InputArea.appendInput(content)
-                    }
+                currentFile = file
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    JOptionPane.showMessageDialog(null, "Error opening file: ${e.message}")
                 }
             }
-            currentFile = file
-
-            // Update the graph input panel
-            InputArea.syncUpdate()
-            VerticesPanel.syncUpdate()
-            DisplayArea.syncUpdate()
-
-            InputArea.addDocumentListener()
         }
     }
 
@@ -62,7 +53,7 @@ object FileManager {
         if (currentFile == null) {
             saveAs()
         } else {
-            currentFile?.writeText(InputArea.getInput())
+            currentFile!!.writeText(InputArea.getInput())
         }
     }
 
@@ -72,33 +63,13 @@ object FileManager {
         fileChooser.fileSelectionMode = JFileChooser.FILES_ONLY
 
         val userSelection = fileChooser.showSaveDialog(null)
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            val fileToSave: File = fileChooser.selectedFile
 
-            if (fileToSave.extension != "txt") {
-                fileToSave.renameTo(File("${fileToSave.absolutePath}.txt"))
-            }
+        if (userSelection != JFileChooser.APPROVE_OPTION) return
 
-            if (fileToSave.createNewFile()) {
-                println("File created: ${fileToSave.absolutePath}")
-            }
+        val fileToSave: File = fileChooser.selectedFile
 
-            fileToSave.writeText(InputArea.getInput())
-            currentFile = fileToSave
-        }
-    }
-
-    fun generateGraph(vertices: Int, file: File) {
-        val random = Random()
-        val edges = mutableListOf<String>()
-
-        for (i in 1..vertices) {
-            val vertex1 = "V${random.nextInt(vertices) + 1}"
-            val vertex2 = "V${random.nextInt(vertices) + 1}"
-            if (vertex1 != vertex2) {
-                edges.add("$vertex1->$vertex2")
-            }
-        }
-        file.writeText(edges.joinToString("\n"))
+        fileToSave.createNewFile()
+        fileToSave.writeText(InputArea.getInput())
+        currentFile = fileToSave
     }
 }

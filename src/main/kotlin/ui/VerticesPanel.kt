@@ -4,12 +4,13 @@ import kotlinx.coroutines.*
 import mateusz.graph.Graph
 import java.awt.BorderLayout
 import javax.swing.*
+import kotlinx.coroutines.swing.Swing
 
 object VerticesPanel : JPanel() {
     private fun readResolve(): Any = VerticesPanel
     private val vertexToCheckBox: MutableMap<String, JCheckBox> = HashMap()
-    private val panel = JPanel()
-    private val scrollPane = JScrollPane(panel)
+    private val verticesPanel = JPanel()
+    private val scrollPane = JScrollPane(verticesPanel)
     private val searchBar = JTextField()
     private val documentListener = object : javax.swing.event.DocumentListener {
         override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = filterVertices(searchBar.text.trim().lowercase())
@@ -17,10 +18,11 @@ object VerticesPanel : JPanel() {
         override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = filterVertices(searchBar.text.trim().lowercase())
     }
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
         layout = BorderLayout()
-        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+        verticesPanel.layout = BoxLayout(verticesPanel, BoxLayout.Y_AXIS)
         scrollPane.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
 
         searchBar.document.addDocumentListener(documentListener)
@@ -31,48 +33,35 @@ object VerticesPanel : JPanel() {
 
     private var filterJob: Job? = null
     private fun filterVertices(filterText: String) {
-        // Create coroutine and job to filter the vertices
-        filterJob?.cancel() // Cancel the previous job if it is active
-
-        filterJob = GlobalScope.launch(Dispatchers.IO) {
-            delay(300) // Delay to avoid too many updates
-            if (!isActive) return@launch // Check if the job is canceled
-
-            SwingUtilities.invokeLater {
-                vertexToCheckBox.forEach { (vertex, checkBox) ->
-                    checkBox.isVisible = vertex.lowercase().contains(filterText)
-                }
-                panel.revalidate()
-                panel.repaint()
+        filterJob?.cancel()
+        filterJob = scope.launch {
+            delay(300)
+            withContext(Dispatchers.Swing) {
+                updateVisibility(filterText)
             }
         }
     }
-    suspend fun filterVerticesSus(filterText: String) {
-        SwingUtilities.invokeLater {
-            vertexToCheckBox.forEach { (vertex, checkBox) ->
-                checkBox.isVisible = vertex.lowercase().contains(filterText)
-            }
-            panel.revalidate()
-            panel.repaint()
+
+    private fun updateVisibility(filterText: String) {
+        vertexToCheckBox.forEach { (vertex, checkBox) ->
+            checkBox.isVisible = vertex.lowercase().contains(filterText)
         }
+        verticesPanel.revalidate()
+        verticesPanel.repaint()
     }
 
-    private fun tryAddVertex(vertex: String) {
-        if (!vertexToCheckBox.containsKey(vertex)) {
-            addVertex(vertex)
-        }
-    }
 
     private fun addVertex(vertex: String) {
-        addVertexSync(vertex)
+        if (vertexToCheckBox.containsKey(vertex)) return
 
-        revalidate()
-        repaint()
-    }
+        val checkBox = JCheckBox(vertex)
+        checkBox.isSelected = true
+        checkBox.addActionListener {
+            Graph.setVertexState(vertex, checkBox.isSelected)
+        }
 
-    private fun removeVertex(vertex: String) {
-        panel.remove(vertexToCheckBox[vertex])
-        vertexToCheckBox.remove(vertex)
+        verticesPanel.add(checkBox)
+        vertexToCheckBox[vertex] = checkBox
 
         revalidate()
         repaint()
@@ -82,46 +71,30 @@ object VerticesPanel : JPanel() {
         val vertices = Graph.getVertices()
 
         vertices.forEach {
-            tryAddVertex(it)
+            addVertex(it)
         }
 
-        val verticesToRemove = mutableListOf<String>()
-
-        for ((vertex, _) in vertexToCheckBox) {
-            if (vertex !in vertices) {
-                verticesToRemove.add(vertex)
-            }
-        }
+        val verticesToRemove = vertexToCheckBox.keys - vertices
 
         verticesToRemove.forEach {
-            removeVertex(it)
+            verticesPanel.remove(vertexToCheckBox[it])
+            vertexToCheckBox.remove(it)
         }
-    }
-
-    fun reset() {
-        panel.removeAll()
-        vertexToCheckBox.clear()
 
         revalidate()
         repaint()
     }
 
-    private fun addVertexSync(vertex: String) {
-        val checkBox = JCheckBox(vertex)
-        checkBox.isSelected = true
-        checkBox.addActionListener {
-            Graph.setVertexState(vertex, checkBox.isSelected)
-        }
+    fun reload() {
+        searchBar.text = ""
 
-        panel.add(checkBox)
-        vertexToCheckBox[vertex] = checkBox
-    }
+        verticesPanel.removeAll()
+        vertexToCheckBox.clear()
 
-    fun syncUpdate() {
         val vertices = Graph.getVertices()
 
         vertices.forEach {
-            addVertexSync(it)
+            addVertex(it)
         }
 
         revalidate()

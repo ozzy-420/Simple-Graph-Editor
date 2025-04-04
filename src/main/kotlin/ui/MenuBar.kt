@@ -32,6 +32,7 @@ class MenuBar : JMenuBar() {
 
         // Add menus to the menu bar
         add(fileMenu)
-        add(optionsMenu)
+
+        //add(optionsMenu)
     }
 }

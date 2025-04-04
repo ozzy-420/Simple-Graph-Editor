@@ -6,7 +6,7 @@ import ui.VerticesPanel
 object Graph {
     private val vertices = mutableMapOf<String, Vertex>()
 
-    fun getVertices(): Collection<String> {
+    fun getVertices(): Set<String> {
         return vertices.keys
     }
 
@@ -25,7 +25,7 @@ object Graph {
         if (oldString == toString()) return
 
         VerticesPanel.update()
-        DisplayArea.syncUpdate()
+        DisplayArea.update()
     }
 
     fun addEdge(edge: Pair<String, String>) {
@@ -37,7 +37,7 @@ object Graph {
 
     fun setVertexState(neighbour: String, state: Boolean) {
         vertices[neighbour]!!.isActive = state
-        DisplayArea.syncUpdate()
+        DisplayArea.update()
     }
 
     override fun toString(): String {

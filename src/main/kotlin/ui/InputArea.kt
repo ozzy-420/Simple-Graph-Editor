@@ -20,7 +20,7 @@ object InputArea : JPanel(BorderLayout()) {
     }
 
     init {
-        addDocumentListener()
+        graphInputArea.document.addDocumentListener(documentListener)
         add(JScrollPane(graphInputArea), BorderLayout.CENTER)
     }
 
@@ -29,13 +29,19 @@ object InputArea : JPanel(BorderLayout()) {
         InputAnalyzer.analyze("")
     }
 
-    fun resetInput() {
-
-        // Make it so that u cant write to the input area
+    fun freeze() {
         graphInputArea.isEditable = false
-        VerticesPanel.reset()
-        Graph.clear()
+        graphInputArea.document.removeDocumentListener(documentListener)
         stringBuilder.setLength(0)
+    }
+
+    fun unfreeze() {
+        graphInputArea.text = stringBuilder.toString()
+        stringBuilder.setLength(0)
+        graphInputArea.isEditable = true
+        graphInputArea.document.addDocumentListener(documentListener)
+
+        InputAnalyzer.analyze(graphInputArea.text.trim())
     }
 
     fun appendInput(input: String) {
@@ -47,18 +53,5 @@ object InputArea : JPanel(BorderLayout()) {
 
     fun getInput(): String {
         return graphInputArea.text
-    }
-
-    fun syncUpdate() {
-        graphInputArea.text = stringBuilder.toString()
-        graphInputArea.isEditable = true
-    }
-
-    fun removeDocumentListener() {
-        graphInputArea.document.removeDocumentListener(documentListener)
-    }
-
-    fun addDocumentListener() {
-        graphInputArea.document.addDocumentListener(documentListener)
     }
 }
