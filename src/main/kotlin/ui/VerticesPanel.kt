@@ -46,6 +46,8 @@ object VerticesPanel : JPanel() {
         vertexToCheckBox.forEach { (vertex, checkBox) ->
             checkBox.isVisible = vertex.lowercase().contains(filterText)
         }
+        verticesPanel.revalidate()
+        verticesPanel.repaint()
     }
 
 
@@ -90,8 +92,8 @@ object VerticesPanel : JPanel() {
         searchBar.text = ""
         searchBar.document.addDocumentListener(documentListener)
 
+
         vertexToCheckBox.forEach { (_, checkBox) ->
             checkBox.isVisible = true
-        }
     }
 }
