@@ -35,7 +35,7 @@ object VerticesPanel : JPanel() {
         filterJob?.cancel() // Cancel the previous job if it is active
 
         filterJob = GlobalScope.launch(Dispatchers.IO) {
-            delay(500) // Delay to avoid too many updates
+            delay(300) // Delay to avoid too many updates
             if (!isActive) return@launch // Check if the job is canceled
 
             SwingUtilities.invokeLater {

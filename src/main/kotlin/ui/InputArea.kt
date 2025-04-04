@@ -1,6 +1,6 @@
 package ui
 
-import mateusz.TextAnalyzer
+import mateusz.InputAnalyzer
 import mateusz.graph.Graph
 import mateusz.parseEdge
 import java.awt.BorderLayout
@@ -14,21 +14,19 @@ object InputArea : JPanel(BorderLayout()) {
     private val graphInputArea = JTextArea()
     private val stringBuilder = StringBuilder()
     private val documentListener = object : javax.swing.event.DocumentListener {
-        override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.analyze(graphInputArea.text.trim())
-        override fun removeUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.analyze(graphInputArea.text.trim())
-        override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = TextAnalyzer.analyze(graphInputArea.text.trim())
+        override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = InputAnalyzer.analyze(graphInputArea.text.trim())
+        override fun removeUpdate(e: javax.swing.event.DocumentEvent?) = InputAnalyzer.analyze(graphInputArea.text.trim())
+        override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = InputAnalyzer.analyze(graphInputArea.text.trim())
     }
 
     init {
         addDocumentListener()
-
-        // graphInputArea.lineWrap = true
         add(JScrollPane(graphInputArea), BorderLayout.CENTER)
     }
 
     fun clear() {
         graphInputArea.text = ""
-        TextAnalyzer.analyze(graphInputArea.text.trim())
+        InputAnalyzer.analyze("")
     }
 
     fun resetInput() {

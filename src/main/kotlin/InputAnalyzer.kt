@@ -10,7 +10,7 @@ fun parseEdge(line: String): Pair<String, String> {
     return first to second
 }
 
-object TextAnalyzer {
+object InputAnalyzer {
     fun analyze(newInput: String) {
         val edges = mutableListOf<Pair<String, String>>()
         var index = 0
@@ -20,14 +20,14 @@ object TextAnalyzer {
             index++
 
             if (errorless && it != "" && !it.contains("->")) {
-                DisplayArea.showInvalidInput(it, index, DisplayArea.invalidInput.NOT_AN_EDGE)
+                DisplayArea.showInvalidInput(it, index, DisplayArea.InvalidInput.NOT_AN_EDGE)
                 errorless = false
             }
 
             val edge = parseEdge(it)
             if (edge.first == "" || edge.second == "") {
                 if (errorless) {
-                    DisplayArea.showInvalidInput(it, index, DisplayArea.invalidInput.EMPTY_STRING)
+                    DisplayArea.showInvalidInput(it, index, DisplayArea.InvalidInput.EMPTY_STRING)
                     errorless = false
                 }
             } else {

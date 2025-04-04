@@ -2,19 +2,20 @@ package mateusz.utils
 
 import kotlinx.coroutines.*
 import net.sourceforge.plantuml.SourceStringReader
+import ui.DisplayArea
+import java.awt.Image
 import java.awt.image.BufferedImage
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import javax.imageio.ImageIO
-import java.awt.Image
 
 object PlantUMLUtil {
-
     private const val CACHE_LIMIT = 1
     private const val WIDTH = 1920
     private const val HEIGHT = 1080
 
     private val imageCache = mutableMapOf<String, BufferedImage>()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var currentJob: Job? = null
 
     suspend fun generateImage(source: String): BufferedImage {
@@ -23,32 +24,42 @@ object PlantUMLUtil {
             return imageCache[source]!!
         }
 
-        // Cancel the current job if it is active
         currentJob?.cancelAndJoin()
 
         val formattedSource = "@startuml\n$source\n@enduml"
         val reader = SourceStringReader(formattedSource)
 
         val os = PipedOutputStream()
-        val pis = PipedInputStream(os)
+        val pis = withContext(Dispatchers.IO) {
+            PipedInputStream(os)
+        }
 
-        currentJob = CoroutineScope(Dispatchers.IO).launch {
+        currentJob = scope.launch {
+            if (!isActive) return@launch
             try {
                 reader.outputImage(os)
             } catch (e: Exception) {
-                println("Przerwano wczytywanie obrazu")
+                println("Error while loading image: ${e.message}")
             } finally {
                 os.close()
             }
         }
 
-        // Odczyt obrazu też w korutynie
         val originalImage = withContext(Dispatchers.IO) {
+            if (!isActive) return@withContext null
             ImageIO.read(pis)
         }
-        pis.close()
 
-        // Resize image
+        if (originalImage == null) {
+            throw CancellationException("Image loading cancelled")
+        }
+
+        withContext(Dispatchers.IO) {
+            if (!isActive) return@withContext
+            pis.close()
+        }
+
+        // Resize the image
         val resizedImage = BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB)
         val graphics = resizedImage.createGraphics()
         graphics.drawImage(originalImage.getScaledInstance(WIDTH, HEIGHT, Image.SCALE_SMOOTH), 0, 0, null)
@@ -61,5 +72,9 @@ object PlantUMLUtil {
         imageCache[source] = resizedImage
 
         return resizedImage
+    }
+
+    fun dispose() {
+        scope.cancel()
     }
 }
