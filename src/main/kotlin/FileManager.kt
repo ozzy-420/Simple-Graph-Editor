@@ -22,6 +22,8 @@ object FileManager {
         if (result != JFileChooser.APPROVE_OPTION) return
 
         val file = fileChooser.selectedFile
+
+        VerticesPanel.resetSearchBar()
         scope.launch {
             try {
                 val lines = file.bufferedReader().use { it.readLines() }
@@ -45,6 +47,7 @@ object FileManager {
     }
 
     fun new() {
+        VerticesPanel.resetSearchBar()
         InputArea.clear()
         currentFile = null
     }
