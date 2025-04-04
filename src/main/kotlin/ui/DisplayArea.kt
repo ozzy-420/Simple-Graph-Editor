@@ -36,7 +36,7 @@ object DisplayArea : JPanel(BorderLayout()) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var updateJob: Job? = null
-    fun syncUpdate() {
+    fun update() {
         showLoading()
         updateJob?.cancel() // Cancel the previous job if it is active
         val input = Graph.toString()
