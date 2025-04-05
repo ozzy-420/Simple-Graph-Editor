@@ -44,7 +44,7 @@ object Graph {
         return vertices.values.joinToString("\n")
     }
 
-    fun clear() {
-        vertices.clear()
+    fun getUnselectedVertices(): Set<String> {
+        return vertices.filter { !it.value.isActive }.keys.toSet()
     }
 }

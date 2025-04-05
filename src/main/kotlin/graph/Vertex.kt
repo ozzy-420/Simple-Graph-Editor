@@ -1,6 +1,6 @@
 package mateusz.graph
 
-class Vertex(val name: String) {
+class Vertex(private val name: String) {
     private val neighbours = mutableSetOf<Vertex>()
     var isActive: Boolean = true
 

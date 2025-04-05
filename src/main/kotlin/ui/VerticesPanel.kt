@@ -76,10 +76,12 @@ object VerticesPanel : JPanel() {
         repaint()
     }
 
-    var updateJob: Job? = null
+    private var updateJob: Job? = null
     fun update() {
-        val vertices = Graph.getVertices()
-        val unselectedVertices = getUnselectedVertices()
+        val vertices = Graph.getVertices().toSet()
+        val unselectedVertices = Graph.getUnselectedVertices().toSet()
+
+        println("Unselected vertices: $unselectedVertices")
 
         verticesPanel.removeAll()
         vertexToCheckBox.clear()

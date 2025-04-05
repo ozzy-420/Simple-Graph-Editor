@@ -2,8 +2,6 @@ package mateusz.utils
 
 import kotlinx.coroutines.*
 import net.sourceforge.plantuml.SourceStringReader
-import ui.DisplayArea
-import java.awt.Image
 import java.awt.image.BufferedImage
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
@@ -62,9 +60,5 @@ object PlantUMLUtil {
         imageCache[source] = originalImage
 
         return originalImage
-    }
-
-    fun dispose() {
-        scope.cancel()
     }
 }

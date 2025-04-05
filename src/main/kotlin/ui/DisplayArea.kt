@@ -31,7 +31,7 @@ object DisplayArea : JPanel(BorderLayout()) {
         image?.let {
             val g2d = g as Graphics2D
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-            g2d.drawImage(it, 0, 0, Math.min(width, it.width), Math.min(height, it.height), null)
+            g2d.drawImage(it, 0, 0, width.coerceAtMost(it.width), height.coerceAtMost(it.height), null)
         }
     }
 
@@ -56,10 +56,6 @@ object DisplayArea : JPanel(BorderLayout()) {
                 repaint()
             }
         }
-    }
-
-    fun dispose() {
-        scope.cancel()
     }
 
     fun showInvalidInput(input: String, index: Int, type: InvalidInput) {

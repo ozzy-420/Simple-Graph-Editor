@@ -8,7 +8,7 @@ class MenuBar : JMenuBar() {
     init {
         // Create a menu
         val fileMenu = JMenu("File")
-        val optionsMenu = JMenu("Optons")
+        //val optionsMenu = JMenu("Optons")
 
         // Create menu items
         val newItem = JMenuItem("New")

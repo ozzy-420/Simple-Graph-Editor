@@ -35,7 +35,9 @@ object InputAnalyzer {
             }
         }
 
-        Graph.setEdges(edges)
         VerticesPanel.update()
+        if (!errorless) return
+
+        Graph.setEdges(edges)
     }
 }
