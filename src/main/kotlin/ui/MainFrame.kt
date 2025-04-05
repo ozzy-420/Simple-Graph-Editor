@@ -11,7 +11,6 @@ class MainFrame : JFrame() {
         defaultCloseOperation = EXIT_ON_CLOSE
         layout = BorderLayout()
 
-
         // Initialize the components
         jMenuBar = MenuBar()
 

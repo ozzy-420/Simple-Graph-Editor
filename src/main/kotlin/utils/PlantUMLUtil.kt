@@ -39,12 +39,12 @@ object PlantUMLUtil {
             }
         }
 
-        val originalImage = withContext(Dispatchers.IO) {
+        val image = withContext(Dispatchers.IO) {
             if (!isActive) return@withContext null
             ImageIO.read(pis)
         }
 
-        if (originalImage == null) {
+        if (image == null) {
             throw CancellationException("Image loading cancelled")
         }
 
@@ -57,8 +57,8 @@ object PlantUMLUtil {
         if (CACHE_LIMIT > 0 && imageCache.size >= CACHE_LIMIT) {
             imageCache.remove(imageCache.keys.first())
         }
-        imageCache[source] = originalImage
+        imageCache[source] = image
 
-        return originalImage
+        return image
     }
 }

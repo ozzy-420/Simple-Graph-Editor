@@ -47,4 +47,8 @@ object Graph {
     fun getUnselectedVertices(): Set<String> {
         return vertices.filter { !it.value.isActive }.keys.toSet()
     }
+
+    fun reset() {
+        vertices.values.forEach { it.isActive = true }
+    }
 }

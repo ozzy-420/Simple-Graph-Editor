@@ -12,6 +12,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import kotlinx.coroutines.swing.Swing
 import mateusz.utils.INPUT_DELAY
+import mateusz.utils.MAX_LOADING_TIME
 
 object DisplayArea : JPanel(BorderLayout()) {
     private fun readResolve(): Any = DisplayArea
@@ -20,7 +21,8 @@ object DisplayArea : JPanel(BorderLayout()) {
 
     enum class InvalidInput {
         NOT_AN_EDGE,
-        EMPTY_STRING
+        EMPTY_STRING,
+        TOO_LARGE_INPUT
     }
 
     private val invalidInputLabel = JLabel("Invalid input label")
@@ -43,25 +45,40 @@ object DisplayArea : JPanel(BorderLayout()) {
         val input = Graph.toString()
 
         updateJob = scope.launch(Dispatchers.IO) {
-            if (!isActive) return@launch // Check if the job is canceled
-            delay(INPUT_DELAY) // Delay to avoid too many updates
+            if (!isActive) return@launch
+            delay(INPUT_DELAY)
 
-            image = PlantUMLUtil.generateImage(input)
+            val imageResult = withTimeoutOrNull(MAX_LOADING_TIME) {
+                PlantUMLUtil.generateImage(input)
+            }
 
-            withContext(Dispatchers.Swing) {
-                if (!isActive) return@withContext // Check if the job is canceled
+            if (!isActive) return@launch
 
-                remove(loadingLabel)
-                revalidate()
-                repaint()
+            if (imageResult == null) {
+                withContext(Dispatchers.Swing) {
+                    if (!isActive) return@withContext
+                    showInvalidInput(input, -1, InvalidInput.TOO_LARGE_INPUT)
+                }
+            } else {
+                image = imageResult
+                withContext(Dispatchers.Swing) {
+                    if (!isActive) return@withContext
+                    super.removeAll()
+                    revalidate()
+                    repaint()
+                }
             }
         }
+
     }
 
     fun showInvalidInput(input: String, index: Int, type: InvalidInput) {
         removeAll()
-
-        invalidInputLabel.text = "Invalid at line $index: $input: ${type.name}"
+        if (index == -1) {
+            invalidInputLabel.text = "Invalid input: ${type.name}"
+        } else {
+            invalidInputLabel.text = "Invalid input at line $index: $input: ${type.name}"
+        }
         add(invalidInputLabel, BorderLayout.CENTER)
 
         revalidate()

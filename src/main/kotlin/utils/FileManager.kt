@@ -1,6 +1,7 @@
 package mateusz.utils
 
 import kotlinx.coroutines.*
+import mateusz.graph.Graph
 import ui.DisplayArea
 import ui.InputArea
 import ui.VerticesPanel
@@ -20,6 +21,7 @@ object FileManager {
 
         val file = fileChooser.selectedFile
 
+        Graph.reset()
         VerticesPanel.resetSearchBar()
         scope.launch {
             try {
@@ -44,6 +46,7 @@ object FileManager {
     }
 
     fun new() {
+        Graph.reset()
         VerticesPanel.resetSearchBar()
         InputArea.clear()
         currentFile = null
