@@ -12,7 +12,7 @@ fun main() {
     }
 }
 
-fun generateGraph(vertices: Int, path: String) {
+fun generateGraph(vertices: Int, path: String = "data/graph.txt") {
     val random = Random()
     val edges = mutableListOf<String>()
 

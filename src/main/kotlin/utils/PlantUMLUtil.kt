@@ -9,56 +9,68 @@ import javax.imageio.ImageIO
 
 object PlantUMLUtil {
     private val imageCache = mutableMapOf<String, BufferedImage>()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("PlantUMLUtil"))
     private var currentJob: Job? = null
+    private var time = 0L
 
     suspend fun generateImage(source: String): BufferedImage {
-        // Check cache
-        if (source in imageCache) {
-            return imageCache[source]!!
-        }
+        if (PRINT_TIMERS) time = System.currentTimeMillis()
 
+        // Check cache first
+        imageCache[source]?.let { return it }
+
+        // Cancel previous job if it's still running
         currentJob?.cancelAndJoin()
 
         val formattedSource = "@startuml\n$source\n@enduml"
         val reader = SourceStringReader(formattedSource)
 
         val os = PipedOutputStream()
-        val pis = withContext(Dispatchers.IO) {
-            PipedInputStream(os)
-        }
+        val pis = withContext(Dispatchers.IO) { PipedInputStream(os) }
 
+        // Start generating the image in a separate coroutine
         currentJob = scope.launch {
             if (!isActive) return@launch
+
             try {
                 reader.outputImage(os)
             } catch (e: Exception) {
-                println("Error while loading image: ${e.message}")
+                if (isActive) println("Error generating image: ${e.message}")
             } finally {
-                os.close()
+                os.close()  // Ensure the stream is closed in case of an error or cancellation
             }
         }
 
-        val originalImage = withContext(Dispatchers.IO) {
+        // Read the generated image
+        val image = withContext(Dispatchers.IO) {
             if (!isActive) return@withContext null
+
             ImageIO.read(pis)
         }
 
-        if (originalImage == null) {
+        if (image == null) {
+            // Return null if the image was not generated
             throw CancellationException("Image loading cancelled")
         }
 
+        // Ensure that the PipedInputStream is closed after reading
         withContext(Dispatchers.IO) {
-            if (!isActive) return@withContext
             pis.close()
         }
 
-        // Update cache
+        // Cache the generated image if it's valid
         if (CACHE_LIMIT > 0 && imageCache.size >= CACHE_LIMIT) {
             imageCache.remove(imageCache.keys.first())
         }
-        imageCache[source] = originalImage
+        imageCache[source] = image
 
-        return originalImage
+        // Print timer if needed
+        if (PRINT_TIMERS) {
+            val elapsed = System.currentTimeMillis() - time
+            println("Image generated in $elapsed ms")
+        }
+
+        return image
     }
 }
+

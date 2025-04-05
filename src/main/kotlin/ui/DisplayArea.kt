@@ -12,6 +12,8 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import kotlinx.coroutines.swing.Swing
 import mateusz.utils.INPUT_DELAY
+import mateusz.utils.MAX_LOADING_TIME
+import mateusz.utils.SHOW_LOADING_ON_FREEZE
 
 object DisplayArea : JPanel(BorderLayout()) {
     private fun readResolve(): Any = DisplayArea
@@ -20,7 +22,8 @@ object DisplayArea : JPanel(BorderLayout()) {
 
     enum class InvalidInput {
         NOT_AN_EDGE,
-        EMPTY_STRING
+        EMPTY_STRING,
+        TOO_LARGE_INPUT
     }
 
     private val invalidInputLabel = JLabel("Invalid input label")
@@ -35,33 +38,55 @@ object DisplayArea : JPanel(BorderLayout()) {
         }
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("DisplayArea"))
     private var updateJob: Job? = null
+    private var currentRequestId = 0
     fun update() {
-        showLoading()
-        updateJob?.cancel() // Cancel the previous job if it is active
+        currentRequestId++
+        val requestId = currentRequestId
+
+        if (SHOW_LOADING_ON_FREEZE) showLoading()
+        else removeAll()
+        updateJob?.cancel()
         val input = Graph.toString()
 
         updateJob = scope.launch(Dispatchers.IO) {
-            if (!isActive) return@launch // Check if the job is canceled
-            delay(INPUT_DELAY) // Delay to avoid too many updates
+            if (!isActive || requestId != currentRequestId) return@launch
+            delay(INPUT_DELAY)
 
-            image = PlantUMLUtil.generateImage(input)
+            val resultImage = withTimeoutOrNull(MAX_LOADING_TIME) {
+                PlantUMLUtil.generateImage(input)
+            }
 
-            withContext(Dispatchers.Swing) {
-                if (!isActive) return@withContext // Check if the job is canceled
+            if (!isActive || requestId != currentRequestId) return@launch
 
-                remove(loadingLabel)
-                revalidate()
-                repaint()
+            if (resultImage == null) {
+                withContext(Dispatchers.Swing) {
+                    if (!isActive || requestId != currentRequestId) return@withContext
+                    showInvalidInput(input, -1, InvalidInput.TOO_LARGE_INPUT)
+                }
+            } else {
+                image = resultImage
+                withContext(Dispatchers.Swing) {
+                    if (!isActive || requestId != currentRequestId) return@withContext
+                    if (SHOW_LOADING_ON_FREEZE) remove(loadingLabel)
+
+                    revalidate()
+                    repaint()
+                }
             }
         }
     }
 
     fun showInvalidInput(input: String, index: Int, type: InvalidInput) {
         removeAll()
+        image = null
 
-        invalidInputLabel.text = "Invalid at line $index: $input: ${type.name}"
+        if (index == -1) {
+            invalidInputLabel.text = "Invalid input: ${type.name}"
+        } else {
+            invalidInputLabel.text = "Invalid input at line $index: $input: ${type.name}"
+        }
         add(invalidInputLabel, BorderLayout.CENTER)
 
         revalidate()
@@ -70,15 +95,11 @@ object DisplayArea : JPanel(BorderLayout()) {
 
     private fun showLoading() {
         removeAll()
+        image = null
 
         add(loadingLabel, BorderLayout.CENTER)
 
         revalidate()
         repaint()
-    }
-
-    override fun removeAll() {
-        super.removeAll()
-        image = null
     }
 }

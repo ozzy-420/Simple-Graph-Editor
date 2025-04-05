@@ -20,7 +20,7 @@ object VerticesPanel : JPanel() {
         override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = filterVertices(searchBar.text.trim().lowercase())
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("VerticesPanel"))
 
     init {
         layout = BorderLayout()
@@ -42,10 +42,6 @@ object VerticesPanel : JPanel() {
                 updateVisibility(filterText)
             }
         }
-    }
-
-    private fun getUnselectedVertices(): Set<String> {
-        return vertexToCheckBox.filter { !it.value.isSelected }.keys.toSet()
     }
 
     private fun updateVisibility(filterText: String) {
@@ -78,16 +74,17 @@ object VerticesPanel : JPanel() {
 
     private var updateJob: Job? = null
     fun update() {
-        val vertices = Graph.getVertices().toSet()
-        val unselectedVertices = Graph.getUnselectedVertices().toSet()
-
-        println("Unselected vertices: $unselectedVertices")
-
         verticesPanel.removeAll()
         vertexToCheckBox.clear()
 
+        revalidate()
+        repaint()
+
         updateJob?.cancel()
         updateJob = scope.launch(Dispatchers.IO) {
+            val vertices = Graph.getVertices().toSet()
+            val unselectedVertices = Graph.getUnselectedVertices().toSet()
+
             vertices.chunked(VERTICES_CHUNK).forEach { chunk ->
                 withContext(Dispatchers.Swing) {
                     chunk.forEach { vertex ->

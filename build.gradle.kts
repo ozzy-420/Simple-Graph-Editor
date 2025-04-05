@@ -11,8 +11,8 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("net.sourceforge.plantuml:plantuml:1.2023.9")
     testImplementation(kotlin("test"))
 }

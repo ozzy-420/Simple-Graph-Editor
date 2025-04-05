@@ -1,5 +1,6 @@
 package mateusz.graph
 
+import mateusz.utils.InputAnalyzer
 import ui.DisplayArea
 import ui.VerticesPanel
 
@@ -37,7 +38,7 @@ object Graph {
 
     fun setVertexState(neighbour: String, state: Boolean) {
         vertices[neighbour]!!.isActive = state
-        DisplayArea.update()
+        if (InputAnalyzer.isInputValid) DisplayArea.update()
     }
 
     override fun toString(): String {
@@ -46,5 +47,9 @@ object Graph {
 
     fun getUnselectedVertices(): Set<String> {
         return vertices.filter { !it.value.isActive }.keys.toSet()
+    }
+
+    fun reset() {
+        vertices.values.forEach { it.isActive = true }
     }
 }
