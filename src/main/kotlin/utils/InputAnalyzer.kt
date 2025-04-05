@@ -1,4 +1,4 @@
-package mateusz
+package mateusz.utils
 
 import mateusz.graph.Graph
 import ui.DisplayArea

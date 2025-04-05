@@ -10,10 +10,6 @@ import java.io.PipedOutputStream
 import javax.imageio.ImageIO
 
 object PlantUMLUtil {
-    private const val CACHE_LIMIT = 1
-    private const val WIDTH = 1920
-    private const val HEIGHT = 1080
-
     private val imageCache = mutableMapOf<String, BufferedImage>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var currentJob: Job? = null
@@ -59,19 +55,13 @@ object PlantUMLUtil {
             pis.close()
         }
 
-        // Resize the image
-        val resizedImage = BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB)
-        val graphics = resizedImage.createGraphics()
-        graphics.drawImage(originalImage.getScaledInstance(WIDTH, HEIGHT, Image.SCALE_SMOOTH), 0, 0, null)
-        graphics.dispose()
-
         // Update cache
         if (CACHE_LIMIT > 0 && imageCache.size >= CACHE_LIMIT) {
             imageCache.remove(imageCache.keys.first())
         }
-        imageCache[source] = resizedImage
+        imageCache[source] = originalImage
 
-        return resizedImage
+        return originalImage
     }
 
     fun dispose() {

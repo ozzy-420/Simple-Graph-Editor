@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage
 import javax.swing.JLabel
 import javax.swing.JPanel
 import kotlinx.coroutines.swing.Swing
+import mateusz.utils.INPUT_DELAY
 
 object DisplayArea : JPanel(BorderLayout()) {
     private fun readResolve(): Any = DisplayArea
@@ -43,7 +44,7 @@ object DisplayArea : JPanel(BorderLayout()) {
 
         updateJob = scope.launch(Dispatchers.IO) {
             if (!isActive) return@launch // Check if the job is canceled
-            delay(300) // Delay to avoid too many updates
+            delay(INPUT_DELAY) // Delay to avoid too many updates
 
             image = PlantUMLUtil.generateImage(input)
 

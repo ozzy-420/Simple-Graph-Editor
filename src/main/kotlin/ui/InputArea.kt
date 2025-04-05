@@ -1,8 +1,8 @@
 package ui
 
-import mateusz.InputAnalyzer
+import mateusz.utils.InputAnalyzer
 import mateusz.graph.Graph
-import mateusz.parseEdge
+import mateusz.utils.parseEdge
 import java.awt.BorderLayout
 import javax.swing.JPanel
 import javax.swing.JScrollPane

@@ -5,6 +5,8 @@ import mateusz.graph.Graph
 import java.awt.BorderLayout
 import javax.swing.*
 import kotlinx.coroutines.swing.Swing
+import mateusz.utils.INPUT_DELAY
+import mateusz.utils.VERTICES_CHUNK
 
 object VerticesPanel : JPanel() {
     private fun readResolve(): Any = VerticesPanel
@@ -35,11 +37,15 @@ object VerticesPanel : JPanel() {
     private fun filterVertices(filterText: String) {
         filterJob?.cancel()
         filterJob = scope.launch {
-            delay(300)
+            delay(INPUT_DELAY)
             withContext(Dispatchers.Swing) {
                 updateVisibility(filterText)
             }
         }
+    }
+
+    private fun getUnselectedVertices(): Set<String> {
+        return vertexToCheckBox.filter { !it.value.isSelected }.keys.toSet()
     }
 
     private fun updateVisibility(filterText: String) {
@@ -51,7 +57,7 @@ object VerticesPanel : JPanel() {
     }
 
 
-    private fun addVertex(vertex: String) {
+    private fun addVertex(vertex: String, isSelected: Boolean = true) {
         if (vertexToCheckBox.containsKey(vertex)) return
 
         val checkBox = JCheckBox(vertex)
@@ -63,28 +69,31 @@ object VerticesPanel : JPanel() {
         verticesPanel.add(checkBox)
         vertexToCheckBox[vertex] = checkBox
 
+        checkBox.isSelected = isSelected
         checkBox.isVisible = vertex.lowercase().contains(searchBar.text.trim().lowercase())
 
         revalidate()
         repaint()
     }
 
+    var updateJob: Job? = null
     fun update() {
         val vertices = Graph.getVertices()
+        val unselectedVertices = getUnselectedVertices()
 
-        vertices.forEach {
-            addVertex(it)
+        verticesPanel.removeAll()
+        vertexToCheckBox.clear()
+
+        updateJob?.cancel()
+        updateJob = scope.launch(Dispatchers.IO) {
+            vertices.chunked(VERTICES_CHUNK).forEach { chunk ->
+                withContext(Dispatchers.Swing) {
+                    chunk.forEach { vertex ->
+                        addVertex(vertex, vertex !in unselectedVertices)
+                    }
+                }
+            }
         }
-
-        val verticesToRemove = vertexToCheckBox.keys - vertices
-
-        verticesToRemove.forEach {
-            verticesPanel.remove(vertexToCheckBox[it])
-            vertexToCheckBox.remove(it)
-        }
-
-        revalidate()
-        repaint()
     }
     
     fun resetSearchBar() {

@@ -1,7 +1,7 @@
 package ui
 
 import javax.swing.*
-import mateusz.FileManager
+import mateusz.utils.FileManager
 
 
 class MenuBar : JMenuBar() {
@@ -16,7 +16,7 @@ class MenuBar : JMenuBar() {
         val saveItem = JMenuItem("Save")
         val saveAsItem = JMenuItem("Save as...")
 
-        val changeCachingItem = JMenuItem("Change caching limit (10)")
+        //val changeCachingItem = JMenuItem("Change caching limit (10)")
 
         // Add menu items to the menu
         fileMenu.add(newItem)

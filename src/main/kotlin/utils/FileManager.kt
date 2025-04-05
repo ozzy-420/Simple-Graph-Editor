@@ -1,15 +1,12 @@
-package mateusz
+package mateusz.utils
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.swing.Swing
-import mateusz.graph.Graph
 import ui.DisplayArea
 import ui.InputArea
 import ui.VerticesPanel
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.JOptionPane
-import javax.swing.SwingUtilities
 
 object FileManager {
     private var currentFile: File? = null
