@@ -10,32 +10,37 @@ fun parseEdge(line: String): Pair<String, String> {
     return first to second
 }
 
+
+
 object InputAnalyzer {
+    var isInputValid = true
+
     fun analyze(newInput: String) {
         val edges = mutableListOf<Pair<String, String>>()
-        var index = 0
-        var errorless = true
+        var lineNumber = 0
+        var isInputValid = true
 
-        newInput.split("\n").forEach {
-            index++
+        newInput.trim().lines().filter { it.isNotEmpty() }.forEach {
+            lineNumber++
 
-            if (errorless && it != "" && !it.contains("->")) {
-                DisplayArea.showInvalidInput(it, index, DisplayArea.InvalidInput.NOT_AN_EDGE)
-                errorless = false
+            if (isInputValid && it != "" && !it.contains("->")) {
+                DisplayArea.showInvalidInput(it, lineNumber, DisplayArea.InvalidInput.NOT_AN_EDGE)
+                isInputValid = false
             }
 
             val edge = parseEdge(it)
             if (edge.first == "" || edge.second == "") {
-                if (errorless) {
-                    DisplayArea.showInvalidInput(it, index, DisplayArea.InvalidInput.EMPTY_STRING)
-                    errorless = false
+                if (isInputValid) {
+                    DisplayArea.showInvalidInput(it, lineNumber, DisplayArea.InvalidInput.EMPTY_STRING)
+                    isInputValid = false
                 }
             } else {
                 edges.add(parseEdge(it))
             }
         }
+        this.isInputValid = isInputValid
 
-        if (errorless) {
+        if (isInputValid) {
             Graph.setEdges(edges)
             DisplayArea.update()
         }

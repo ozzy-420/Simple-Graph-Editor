@@ -20,7 +20,7 @@ object VerticesPanel : JPanel() {
         override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = filterVertices(searchBar.text.trim().lowercase())
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("VerticesPanel"))
 
     init {
         layout = BorderLayout()

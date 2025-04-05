@@ -9,7 +9,7 @@ import javax.imageio.ImageIO
 
 object PlantUMLUtil {
     private val imageCache = mutableMapOf<String, BufferedImage>()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("PlantUMLUtil"))
     private var currentJob: Job? = null
     private var time = 0L
 

@@ -13,6 +13,7 @@ import javax.swing.JPanel
 import kotlinx.coroutines.swing.Swing
 import mateusz.utils.INPUT_DELAY
 import mateusz.utils.MAX_LOADING_TIME
+import mateusz.utils.SHOW_LOADING_ON_FREEZE
 
 object DisplayArea : JPanel(BorderLayout()) {
     private fun readResolve(): Any = DisplayArea
@@ -37,14 +38,15 @@ object DisplayArea : JPanel(BorderLayout()) {
         }
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("DisplayArea"))
     private var updateJob: Job? = null
     private var currentRequestId = 0
     fun update() {
         currentRequestId++
         val requestId = currentRequestId
 
-        showLoading()
+        if (SHOW_LOADING_ON_FREEZE) showLoading()
+        else removeAll()
         updateJob?.cancel()
         val input = Graph.toString()
 
@@ -67,7 +69,8 @@ object DisplayArea : JPanel(BorderLayout()) {
                 image = resultImage
                 withContext(Dispatchers.Swing) {
                     if (!isActive || requestId != currentRequestId) return@withContext
-                    remove(loadingLabel)
+                    if (SHOW_LOADING_ON_FREEZE) remove(loadingLabel)
+
                     revalidate()
                     repaint()
                 }
@@ -77,6 +80,8 @@ object DisplayArea : JPanel(BorderLayout()) {
 
     fun showInvalidInput(input: String, index: Int, type: InvalidInput) {
         removeAll()
+        image = null
+
         if (index == -1) {
             invalidInputLabel.text = "Invalid input: ${type.name}"
         } else {
@@ -90,15 +95,11 @@ object DisplayArea : JPanel(BorderLayout()) {
 
     private fun showLoading() {
         removeAll()
+        image = null
 
         add(loadingLabel, BorderLayout.CENTER)
 
         revalidate()
         repaint()
-    }
-
-    override fun removeAll() {
-        super.removeAll()
-        image = null
     }
 }

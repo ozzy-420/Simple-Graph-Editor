@@ -11,7 +11,7 @@ import javax.swing.JOptionPane
 
 object FileManager {
     private var currentFile: File? = null
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("FileManager"))
 
     fun open() {
         val fileChooser = JFileChooser(File("data"))
@@ -20,16 +20,26 @@ object FileManager {
         if (result != JFileChooser.APPROVE_OPTION) return
 
         val file = fileChooser.selectedFile
+        if (!file.exists()) {
+            JOptionPane.showMessageDialog(null, "File does not exist")
+            return
+        }
+        if (!file.canRead()) {
+            JOptionPane.showMessageDialog(null, "File is not readable")
+            return
+        }
 
+        if (file.bufferedReader().lineSequence().count() > MAX_LINE_COUNT) {
+            JOptionPane.showMessageDialog(null, "File is too large")
+            return
+        }
         Graph.reset()
         VerticesPanel.resetSearchBar()
         scope.launch {
             try {
-                val lines = file.bufferedReader().use { it.readLines() }
-
                 InputArea.freeze()
 
-                lines.forEach { line ->
+                file.bufferedReader().forEachLine { line ->
                     InputArea.appendInput(line)
                 }
 
