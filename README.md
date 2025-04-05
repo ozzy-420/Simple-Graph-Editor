@@ -46,3 +46,9 @@ Constant values are declared in the `src/main/kotlin/utils/Utils.kt` file. These
 - **MAX_LINE_COUNT**: The maximum number of lines allowed in the graph input. Default is `1500` lines.
 
 These constants provide control over key aspects of the application, such as performance, UI responsiveness, and input validation.
+
+## Tests
+
+Tests are available in the `src/test/kotlin/` directory, where unit tests for the core logic and functionalities of the application are implemented. These tests cover various components of the application, ensuring the correctness of graph visualization and input parsing.
+
+Additionally, example graph data files are located in the `data/` directory. These files contain edge lists representing graphs of different sizes (e.g., 15, 100, 1000, or 10000 edges). These data files are used to validate the application's ability to handle different graph sizes and ensure performance remains optimal.
