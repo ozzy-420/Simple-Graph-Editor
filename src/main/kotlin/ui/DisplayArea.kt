@@ -39,37 +39,40 @@ object DisplayArea : JPanel(BorderLayout()) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var updateJob: Job? = null
+    private var currentRequestId = 0
     fun update() {
+        currentRequestId++
+        val requestId = currentRequestId
+
         showLoading()
-        updateJob?.cancel() // Cancel the previous job if it is active
+        updateJob?.cancel()
         val input = Graph.toString()
 
         updateJob = scope.launch(Dispatchers.IO) {
-            if (!isActive) return@launch
+            if (!isActive || requestId != currentRequestId) return@launch
             delay(INPUT_DELAY)
 
-            val imageResult = withTimeoutOrNull(MAX_LOADING_TIME) {
+            val resultImage = withTimeoutOrNull(MAX_LOADING_TIME) {
                 PlantUMLUtil.generateImage(input)
             }
 
-            if (!isActive) return@launch
+            if (!isActive || requestId != currentRequestId) return@launch
 
-            if (imageResult == null) {
+            if (resultImage == null) {
                 withContext(Dispatchers.Swing) {
-                    if (!isActive) return@withContext
+                    if (!isActive || requestId != currentRequestId) return@withContext
                     showInvalidInput(input, -1, InvalidInput.TOO_LARGE_INPUT)
                 }
             } else {
-                image = imageResult
+                image = resultImage
                 withContext(Dispatchers.Swing) {
-                    if (!isActive) return@withContext
-                    super.removeAll()
+                    if (!isActive || requestId != currentRequestId) return@withContext
+                    remove(loadingLabel)
                     revalidate()
                     repaint()
                 }
             }
         }
-
     }
 
     fun showInvalidInput(input: String, index: Int, type: InvalidInput) {
