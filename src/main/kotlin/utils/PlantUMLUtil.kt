@@ -30,13 +30,9 @@ object PlantUMLUtil {
 
         currentJob = scope.launch {
             if (!isActive) return@launch
-            try {
-                reader.outputImage(os)
-            } catch (e: Exception) {
-                println("Error while loading image: ${e.message}")
-            } finally {
-                os.close()
-            }
+
+            reader.outputImage(os)
+            os.close()
         }
 
         val image = withContext(Dispatchers.IO) {
