@@ -48,3 +48,9 @@ These constants provide control over key aspects of the application, such as per
 Tests are available in the `src/test/kotlin/` directory, where unit tests for the core logic and functionalities of the application are implemented. These tests cover various components of the application, ensuring the correctness of graph visualization and input parsing.
 
 Additionally, example graph data files are located in the `data/` directory. These files contain edge lists representing graphs of different sizes (e.g., 15, 100, 1000, or 10000 edges). These data files are used to validate the application's ability to handle different graph sizes and ensure performance remains optimal.
+
+## Screenshots
+
+![Input area](https://github.com/user-attachments/assets/3dc8f550-7387-4c41-9a1f-20fa389d4ca6)
+
+
