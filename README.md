@@ -28,10 +28,6 @@ This is a Kotlin-based application that allows users to visualize and interact w
 
 3. Launch the application (`src/main/kotlin/Main.kt`) and start interacting with the graph by entering edges into the input area. The directed graph will be visualized in real-time.
 
-## Known Limitations
-
-The application may struggle with very large graphs (e.g., over 1000 vertices)
-
 ## Constants
 
 Constant values are declared in the `src/main/kotlin/utils/Utils.kt` file. These constants are used throughout the application to control various behaviors and settings.
